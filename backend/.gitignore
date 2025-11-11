@@ -1,0 +1,16 @@
+# React/Vite build output
+# ---------------------------------
+dist
+.vite
+
+# React/Vite cache
+# ---------------------------------
+.eslintcache
+.vite-node
+.cache
+
+# Dependencies
+# ---------------------------------
+# (This is usually covered by the root .gitignore,
+# but it's good practice to add it here too)
+node_modules
