@@ -19,7 +19,7 @@ const AdminSignupPage = () => {
   // 🔥 Redirect admin after successful signup
   useEffect(() => {
     if (isAuthenticated && role === "admin") {
-      navigate("/admin-dashboard");   // FIXED
+      navigate("/admin-dashboard");   // CORRECT
     }
   }, [isAuthenticated, role, navigate]);
 
@@ -41,6 +41,7 @@ const AdminSignupPage = () => {
               className="w-full px-3 py-2 border rounded-md"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              autoComplete="name"
               required
             />
           </div>
@@ -52,6 +53,7 @@ const AdminSignupPage = () => {
               className="w-full px-3 py-2 border rounded-md"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               required
             />
           </div>
@@ -63,6 +65,7 @@ const AdminSignupPage = () => {
               className="w-full px-3 py-2 border rounded-md"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
               required
             />
           </div>

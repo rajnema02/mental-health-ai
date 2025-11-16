@@ -1,29 +1,42 @@
-// models/Official.js
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
-const officialSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+const officialSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
 
-  email: { type: String, required: true, unique: true },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+    },
 
-  password: { type: String, required: true },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+    },
 
-  role: {
-    type: String,
-    enum: ["admin"],
-    default: "admin",
+    role: {
+      type: String,
+      enum: ["admin"],
+      default: "admin",
+    },
   },
-});
+  { timestamps: true }
+);
 
+// Hash password before saving
 officialSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
-officialSchema.methods.comparePassword = function (enteredPassword) {
-  return bcrypt.compare(enteredPassword, this.password);
+// Compare passwords
+officialSchema.methods.comparePassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
 };
 
 module.exports = mongoose.model("Official", officialSchema);

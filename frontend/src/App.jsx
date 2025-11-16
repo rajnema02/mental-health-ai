@@ -18,9 +18,9 @@ export default function App() {
     <Routes>
       {/* PUBLIC ROUTES */}
       <Route path="/admin-login" element={<AdminLoginPage />} />
+      <Route path="/admin-signup" element={<AdminSignupPage />} />
       <Route path="/" element={<UserLoginPage />} />
       <Route path="/user-signup" element={<UserSignupPage />} />
-      <Route path="/admin-signup" element={<AdminSignupPage />} />
 
       {/* USER-PROTECTED ROUTE */} 
       <Route

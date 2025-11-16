@@ -1,9 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { adminLogin, userLogin, userSignup, adminSignup } from '../../api/authApi';
 
-// -----------------------------------------------
-// Restore Authentication From localStorage
-// -----------------------------------------------
+// Restore from localStorage
 const storedUser = JSON.parse(localStorage.getItem('user'));
 const storedToken = localStorage.getItem('token');
 const storedRole = localStorage.getItem('role');
@@ -17,53 +15,49 @@ const initialState = {
   error: null,
 };
 
-// -----------------------------------------------
-//  Async Thunks
-// -----------------------------------------------
-
+// -------------------------
 // Admin Login
+// -------------------------
 export const loginAdmin = createAsyncThunk(
   'auth/loginAdmin',
   async ({ email, password }, thunkAPI) => {
     try {
       const data = await adminLogin(email, password);
 
-      // Save to local storage
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data));
       localStorage.setItem('role', 'admin');
 
       return { ...data, role: 'admin' };
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error?.response?.data?.message || error.message
-      );
+      return thunkAPI.rejectWithValue(error?.response?.data?.message || 'Login failed');
     }
   }
 );
 
-// Admin Signup
+// -------------------------
+// Admin Signup  (FIXED)
+// -------------------------
 export const signupAdmin = createAsyncThunk(
-  "auth/signupAdmin",
+  'auth/signupAdmin',
   async ({ name, email, password }, thunkAPI) => {
     try {
       const data = await adminSignup(name, email, password);
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data));
-      localStorage.setItem("role", "admin");
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data));
+      localStorage.setItem('role', 'admin');
 
-      return { ...data, role: "admin" };
+      return { ...data, role: 'admin' };
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error?.response?.data?.message || error.message
-      );
+      return thunkAPI.rejectWithValue(error?.response?.data?.message || 'Signup failed');
     }
   }
 );
 
-
+// -------------------------
 // User Login
+// -------------------------
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ email, password }, thunkAPI) => {
@@ -76,14 +70,14 @@ export const loginUser = createAsyncThunk(
 
       return { ...data, role: 'user' };
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error?.response?.data?.message || error.message
-      );
+      return thunkAPI.rejectWithValue(error?.response?.data?.message || 'Login failed');
     }
   }
 );
 
+// -------------------------
 // User Signup
+// -------------------------
 export const signupUser = createAsyncThunk(
   'auth/signupUser',
   async ({ name, email, password }, thunkAPI) => {
@@ -96,20 +90,18 @@ export const signupUser = createAsyncThunk(
 
       return { ...data, role: 'user' };
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error?.response?.data?.message || error.message
-      );
+      return thunkAPI.rejectWithValue(error?.response?.data?.message || 'Signup failed');
     }
   }
 );
 
-// -----------------------------------------------
+// -------------------------
 // Slice
-// -----------------------------------------------
-
+// -------------------------
 const authSlice = createSlice({
   name: 'auth',
   initialState,
+
   reducers: {
     logout: (state) => {
       localStorage.removeItem('token');
@@ -137,7 +129,6 @@ const authSlice = createSlice({
       state.user = action.payload;
       state.token = action.payload.token;
       state.role = action.payload.role;
-      state.error = null;
     };
 
     const rejected = (state, action) => {
@@ -147,17 +138,22 @@ const authSlice = createSlice({
     };
 
     builder
-      // Admin Login
+      // ADMIN LOGIN
       .addCase(loginAdmin.pending, pending)
       .addCase(loginAdmin.fulfilled, fulfilled)
       .addCase(loginAdmin.rejected, rejected)
 
-      // User Login
+      // ADMIN SIGNUP (🔥 MISSING EARLIER – FIXED)
+      .addCase(signupAdmin.pending, pending)
+      .addCase(signupAdmin.fulfilled, fulfilled)
+      .addCase(signupAdmin.rejected, rejected)
+
+      // USER LOGIN
       .addCase(loginUser.pending, pending)
       .addCase(loginUser.fulfilled, fulfilled)
       .addCase(loginUser.rejected, rejected)
 
-      // User Signup
+      // USER SIGNUP
       .addCase(signupUser.pending, pending)
       .addCase(signupUser.fulfilled, fulfilled)
       .addCase(signupUser.rejected, rejected);

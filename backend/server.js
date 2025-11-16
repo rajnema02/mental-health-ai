@@ -34,6 +34,9 @@ app.use('/api/posts', require('./src/api/routes/userPostRoutes'));
 // Admin Auth Routes
 app.use('/api/auth/official', require('./src/api/routes/authRoutes'));
 
+app.use("/api/admin", require("./src/api/routes/adminRoutes"));
+
+
 // Admin Protected Routes
 app.use('/api/alerts', adminAuthMiddleware, require('./src/api/routes/alertRoutes'));
 app.use('/api/stats', adminAuthMiddleware, require('./src/api/routes/statsRoutes'));

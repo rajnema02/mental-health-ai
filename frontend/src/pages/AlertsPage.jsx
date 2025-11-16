@@ -1,22 +1,26 @@
-import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { fetchAlerts } from "../store/slices/alertsSlice";
-
+import AdminLayout from "../components/layout/AdminLayout.jsx";
 import AlertList from "../components/alerts/AlertList";
 import AlertModal from "../components/alerts/AlertModal";
+import { useState } from "react";
 
 const AlertsPage = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const dispatch = useDispatch();
+  const token = useSelector((state) => state.auth.token);
 
-  // Load alerts when page opens
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   useEffect(() => {
-    dispatch(fetchAlerts());
-  }, [dispatch]);
+    if (token) {
+      dispatch(fetchAlerts());
+    }
+  }, [token, dispatch]);  // <---- FIXED
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center justify-between">
+    <AdminLayout>
+      <div className="flex items-center justify-between mb-4">
         <h1 className="text-3xl font-bold">Manage Alerts</h1>
 
         <button
@@ -29,10 +33,8 @@ const AlertsPage = () => {
 
       <AlertList />
 
-      {isModalOpen && (
-        <AlertModal closeModal={() => setIsModalOpen(false)} />
-      )}
-    </div>
+      {isModalOpen && <AlertModal closeModal={() => setIsModalOpen(false)} />}
+    </AdminLayout>
   );
 };
 

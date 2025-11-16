@@ -77,15 +77,14 @@ const AdminLoginPage = () => {
             {status === "loading" ? <Loader /> : "Login"}
           </button>
         </form>
-        <p className="text-sm text-center text-gray-600">
-                  New here?{" "}
-                  <Link
-                    to="/admin-signup"
-                    className="font-medium text-blue-600 hover:underline"
-                  >
-                    Create an account
-                  </Link>
-          </p>
+        <p className="text-sm text-center text-gray-400">
+          <Link
+            to="/admin-signup"
+            className="font-medium text-gray-500 hover:underline"
+          >
+            Admin Signup
+          </Link>
+        </p>
       </div>
     </div>
   );

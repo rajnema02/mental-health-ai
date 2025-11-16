@@ -3,25 +3,22 @@ import { getAlerts, createAlert, deleteAlert } from "../../api/alertsApi";
 
 export const fetchAlerts = createAsyncThunk(
   "alerts/fetchAlerts",
-  async (_, thunkAPI) => {
-    const token = thunkAPI.getState().auth.token;
-    return await getAlerts(token);   // ✔ send token
+  async () => {
+    return await getAlerts();  // token auto-attached by interceptor
   }
 );
 
 export const addAlert = createAsyncThunk(
   "alerts/addAlert",
-  async (alertData, thunkAPI) => {
-    const token = thunkAPI.getState().auth.token;
-    return await createAlert(alertData, token);  // ✔ send token
+  async (alertData) => {
+    return await createAlert(alertData);  // token auto-attached
   }
 );
 
 export const removeAlert = createAsyncThunk(
   "alerts/removeAlert",
-  async (id, thunkAPI) => {
-    const token = thunkAPI.getState().auth.token;
-    await deleteAlert(id, token);   // ✔ send token
+  async (id) => {
+    await deleteAlert(id);  // token auto-attached
     return id;
   }
 );
@@ -46,7 +43,7 @@ const alertsSlice = createSlice({
         state.alerts.push(action.payload);
       })
       .addCase(removeAlert.fulfilled, (state, action) => {
-        state.alerts = state.alerts.filter(a => a._id !== action.payload);
+        state.alerts = state.alerts.filter((a) => a._id !== action.payload);
       });
   },
 });
