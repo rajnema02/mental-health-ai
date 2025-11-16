@@ -1,40 +1,29 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+// models/Official.js
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
-const officialSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-    password: {
-      type: String,
-      required: true,
-    },
+const officialSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+
+  email: { type: String, required: true, unique: true },
+
+  password: { type: String, required: true },
+
+  role: {
+    type: String,
+    enum: ["admin"],
+    default: "admin",
   },
-  { timestamps: true }
-);
+});
 
-// Hash password before saving
-officialSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+officialSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
-// Method to compare entered password with hashed password
-officialSchema.methods.comparePassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+officialSchema.methods.comparePassword = function (enteredPassword) {
+  return bcrypt.compare(enteredPassword, this.password);
 };
 
-module.exports = mongoose.model('Official', officialSchema);
+module.exports = mongoose.model("Official", officialSchema);

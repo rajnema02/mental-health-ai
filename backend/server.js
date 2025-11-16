@@ -7,7 +7,7 @@ const { Server } = require('socket.io');
 const connectDB = require('./src/config/db');
 const socketManager = require('./src/services/socketManager');
 const pipeline = require('./src/pipeline/index');
-const adminAuthMiddleware = require('./src/api/middleware/authMiddleware');
+const adminAuthMiddleware = require('./src/api/middleware/adminMiddleware');
 
 // --- Initialization ---
 const app = express();

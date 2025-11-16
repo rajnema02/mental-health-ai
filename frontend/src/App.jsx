@@ -11,6 +11,7 @@ import UserDashboardPage from "./pages/UserDashboardPage";
 import Sidebar from "./components/layout/Sidebar";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminRoute from "./routes/AdminRoute";
+import AdminSignupPage from "./pages/AdminSignupPage";
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
       <Route path="/admin-login" element={<AdminLoginPage />} />
       <Route path="/" element={<UserLoginPage />} />
       <Route path="/user-signup" element={<UserSignupPage />} />
+      <Route path="/admin-signup" element={<AdminSignupPage />} />
 
       {/* USER-PROTECTED ROUTE */} 
       <Route

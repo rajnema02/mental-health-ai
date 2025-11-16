@@ -1,10 +1,16 @@
-const express = require('express');
+// routes/officialAuthRoutes.js
+const express = require("express");
 const router = express.Router();
-const { loginOfficial } = require('../controller/authController');
 
-// @route   POST /api/auth/official/login
-// @desc    Authenticate official & get token
-// @access  Public
-router.post('/login', loginOfficial);
+const {
+  registerOfficial,
+  loginOfficial,
+} = require("../controller/authController");
+
+// Admin Signup
+router.post("/signup", registerOfficial);
+
+// Admin Login
+router.post("/login", loginOfficial);
 
 module.exports = router;

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { adminLogin, userLogin, userSignup } from '../../api/authApi';
+import { adminLogin, userLogin, userSignup, adminSignup } from '../../api/authApi';
 
 // -----------------------------------------------
 // Restore Authentication From localStorage
@@ -41,6 +41,27 @@ export const loginAdmin = createAsyncThunk(
     }
   }
 );
+
+// Admin Signup
+export const signupAdmin = createAsyncThunk(
+  "auth/signupAdmin",
+  async ({ name, email, password }, thunkAPI) => {
+    try {
+      const data = await adminSignup(name, email, password);
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data));
+      localStorage.setItem("role", "admin");
+
+      return { ...data, role: "admin" };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error?.response?.data?.message || error.message
+      );
+    }
+  }
+);
+
 
 // User Login
 export const loginUser = createAsyncThunk(

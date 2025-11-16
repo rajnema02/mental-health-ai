@@ -76,7 +76,7 @@ const UserLoginPage = () => {
         <p className="text-sm text-center text-gray-600">
           New here?{" "}
           <Link
-            to="/user/signup"
+            to="/user-signup"
             className="font-medium text-blue-600 hover:underline"
           >
             Create an account

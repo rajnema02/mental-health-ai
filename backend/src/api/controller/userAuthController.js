@@ -1,45 +1,34 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+// controllers/userAuthController.js
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
-// Helper to generate a USER token
 const generateUserToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET_USER, {
-    expiresIn: '7d',
+  return jwt.sign({ id, role: "user" }, process.env.JWT_SECRET_USER, {
+    expiresIn: "7d",
   });
 };
 
-// @desc    Register a new public user
 exports.registerUser = async (req, res) => {
-  const { name, email, password } = req.body; // <-- ADDED NAME
+  const { name, email, password } = req.body;
 
   try {
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
+    const exists = await User.findOne({ email });
+    if (exists) return res.status(400).json({ message: "User already exists" });
 
-    const user = await User.create({
-      name, // <-- ADDED NAME
-      email,
-      password,
+    const user = await User.create({ name, email, password });
+
+    res.status(201).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: "user",
+      token: generateUserToken(user._id),
     });
-
-    if (user) {
-      res.status(201).json({
-        _id: user._id,
-        name: user.name, // <-- ADDED NAME
-        email: user.email,
-        token: generateUserToken(user._id),
-      });
-    } else {
-      res.status(400).json({ message: 'Invalid user data' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-// @desc    Authenticate a public user & get token
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -47,16 +36,17 @@ exports.loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.comparePassword(password))) {
-      res.json({
+      return res.json({
         _id: user._id,
-        name: user.name, // <-- ADDED NAME
+        name: user.name,
         email: user.email,
+        role: "user",
         token: generateUserToken(user._id),
       });
-    } else {
-      res.status(401).json({ message: 'Invalid email or password' });
     }
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+
+    res.status(401).json({ message: "Invalid email or password" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 };

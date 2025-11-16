@@ -13,6 +13,15 @@ export const adminLogin = async (email, password) => {
   return response.data;
 };
 
+export const adminSignup = async (name, email, password) => {
+  const res = await axios.post(`${BACKEND_URL}/api/auth/official/signup`, {
+    name,
+    email,
+    password,
+  });
+  return res.data;
+};
+
 // --- User Auth ---
 export const userLogin = async (email, password) => {
   const response = await axios.post(`${BACKEND_URL}/api/auth/user/login`, {

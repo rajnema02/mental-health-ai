@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginAdmin } from "../store/slices/authSlice";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/common/Loader";
 
 const AdminLoginPage = () => {
@@ -12,8 +12,8 @@ const AdminLoginPage = () => {
     (state) => state.auth
   );
 
-  const [email, setEmail] = useState("official@demo.com");
-  const [password, setPassword] = useState("Official@123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   // Redirect admin after successful login
   if (isAuthenticated && role === "admin") {
@@ -77,6 +77,15 @@ const AdminLoginPage = () => {
             {status === "loading" ? <Loader /> : "Login"}
           </button>
         </form>
+        <p className="text-sm text-center text-gray-600">
+                  New here?{" "}
+                  <Link
+                    to="/admin-signup"
+                    className="font-medium text-blue-600 hover:underline"
+                  >
+                    Create an account
+                  </Link>
+          </p>
       </div>
     </div>
   );

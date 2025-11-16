@@ -1,10 +1,11 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const authMiddleware = require('../middleware/authMiddleware');
-const { getInitialLoad, getDashboardStats } = require('../controller/statsController');
+const adminMiddleware = require("../middleware/adminMiddleware");
+const { getInitialLoad, getDashboardStats } = require("../controller/statsController");
 
-router.get('/initial-load', authMiddleware, getInitialLoad);
-router.get('/dashboard', authMiddleware, getDashboardStats);
+// Protected Admin Routes
+router.get("/initial-load", adminMiddleware, getInitialLoad);
+router.get("/dashboard", adminMiddleware, getDashboardStats);
 
 module.exports = router;
