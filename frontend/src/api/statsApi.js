@@ -1,13 +1,25 @@
-import api from './api';
+import api from "./api";
 
 export const getInitialLoad = async (token) => {
-  const config = { headers: { Authorization: `Bearer ${token}` } };
-  const response = await api.get('/api/stats/initial-load', config);
-  return response.data;
+  if (!token) {
+    console.error("NO TOKEN SENT TO getInitialLoad()");
+  }
+
+  return api.get("/api/stats/initial-load", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };
 
 export const getDashboardStats = async (token) => {
-  const config = { headers: { Authorization: `Bearer ${token}` } };
-  const response = await api.get('/api/stats/dashboard', config);
-  return response.data;
+  if (!token) {
+    console.error("NO TOKEN SENT TO getDashboardStats()");
+  }
+
+  return api.get("/api/stats/dashboard", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };

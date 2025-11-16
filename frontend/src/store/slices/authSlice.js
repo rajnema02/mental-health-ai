@@ -1,80 +1,92 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import {
-  adminLogin,
-  userLogin,
-  userSignup,
-} from '../../api/authApi';
+import { adminLogin, userLogin, userSignup } from '../../api/authApi';
 
-// Get initial state from local storage
-const user = JSON.parse(localStorage.getItem('user'));
-const token = localStorage.getItem('token');
-const role = localStorage.getItem('role');
+// -----------------------------------------------
+// Restore Authentication From localStorage
+// -----------------------------------------------
+const storedUser = JSON.parse(localStorage.getItem('user'));
+const storedToken = localStorage.getItem('token');
+const storedRole = localStorage.getItem('role');
 
 const initialState = {
-  user: user || null,
-  token: token || null,
-  role: role || null,
-  isAuthenticated: !!token,
+  user: storedUser || null,
+  token: storedToken || null,
+  role: storedRole || null,
+  isAuthenticated: !!storedToken,
   status: 'idle',
   error: null,
 };
 
-// --- Thunks ---
+// -----------------------------------------------
+//  Async Thunks
+// -----------------------------------------------
+
+// Admin Login
 export const loginAdmin = createAsyncThunk(
-  'auth/adminLogin',
+  'auth/loginAdmin',
   async ({ email, password }, thunkAPI) => {
     try {
       const data = await adminLogin(email, password);
+
+      // Save to local storage
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data));
       localStorage.setItem('role', 'admin');
+
       return { ...data, role: 'admin' };
     } catch (error) {
-      const message =
-        (error.response && error.response.data && error.response.data.message) ||
-        error.message;
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(
+        error?.response?.data?.message || error.message
+      );
     }
   }
 );
 
+// User Login
 export const loginUser = createAsyncThunk(
-  'auth/userLogin',
+  'auth/loginUser',
   async ({ email, password }, thunkAPI) => {
     try {
       const data = await userLogin(email, password);
+
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data));
       localStorage.setItem('role', 'user');
+
       return { ...data, role: 'user' };
     } catch (error) {
-      const message =
-        (error.response && error.response.data && error.response.data.message) ||
-        error.message;
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(
+        error?.response?.data?.message || error.message
+      );
     }
   }
 );
 
+// User Signup
 export const signupUser = createAsyncThunk(
-  'auth/userSignup',
+  'auth/signupUser',
   async ({ name, email, password }, thunkAPI) => {
     try {
       const data = await userSignup(name, email, password);
+
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data));
       localStorage.setItem('role', 'user');
+
       return { ...data, role: 'user' };
     } catch (error) {
-      const message =
-        (error.response && error.response.data && error.response.data.message) ||
-        error.message;
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(
+        error?.response?.data?.message || error.message
+      );
     }
   }
 );
 
-export const authSlice = createSlice({
+// -----------------------------------------------
+// Slice
+// -----------------------------------------------
+
+const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
@@ -82,41 +94,52 @@ export const authSlice = createSlice({
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       localStorage.removeItem('role');
+
       state.user = null;
       state.token = null;
       state.role = null;
+      state.error = null;
       state.isAuthenticated = false;
+      state.status = 'idle';
     },
   },
+
   extraReducers: (builder) => {
-    const handlePending = (state) => {
+    const pending = (state) => {
       state.status = 'loading';
       state.error = null;
     };
-    const handleFulfilled = (state, action) => {
+
+    const fulfilled = (state, action) => {
       state.status = 'succeeded';
       state.isAuthenticated = true;
       state.user = action.payload;
       state.token = action.payload.token;
       state.role = action.payload.role;
+      state.error = null;
     };
-    const handleRejected = (state, action) => {
+
+    const rejected = (state, action) => {
       state.status = 'failed';
       state.error = action.payload;
       state.isAuthenticated = false;
     };
 
     builder
-      // All three thunks share the same logic
-      .addCase(loginAdmin.pending, handlePending)
-      .addCase(loginAdmin.fulfilled, handleFulfilled)
-      .addCase(loginAdmin.rejected, handleRejected)
-      .addCase(loginUser.pending, handlePending)
-      .addCase(loginUser.fulfilled, handleFulfilled)
-      .addCase(loginUser.rejected, handleRejected)
-      .addCase(signupUser.pending, handlePending)
-      .addCase(signupUser.fulfilled, handleFulfilled)
-      .addCase(signupUser.rejected, handleRejected);
+      // Admin Login
+      .addCase(loginAdmin.pending, pending)
+      .addCase(loginAdmin.fulfilled, fulfilled)
+      .addCase(loginAdmin.rejected, rejected)
+
+      // User Login
+      .addCase(loginUser.pending, pending)
+      .addCase(loginUser.fulfilled, fulfilled)
+      .addCase(loginUser.rejected, rejected)
+
+      // User Signup
+      .addCase(signupUser.pending, pending)
+      .addCase(signupUser.fulfilled, fulfilled)
+      .addCase(signupUser.rejected, rejected);
   },
 });
 

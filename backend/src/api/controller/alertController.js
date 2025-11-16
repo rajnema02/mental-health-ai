@@ -19,7 +19,6 @@ exports.createAlert = async (req, res) => {
   }
 };
 
-// @desc    Get official's alerts
 exports.getAlerts = async (req, res) => {
   try {
     const alerts = await AlertZone.find({ official: req.official._id });

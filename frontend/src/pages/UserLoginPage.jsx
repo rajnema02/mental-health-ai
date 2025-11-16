@@ -1,20 +1,23 @@
-import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from '../store/reduxShim';
-import { useNavigate, Link } from 'react-router-dom';
-import { loginUser } from '../store/slices/authSlice';
-import Loader from '../components/common/Loader';
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, Link } from "react-router-dom";
+import { loginUser } from "../store/slices/authSlice";
+import Loader from "../components/common/Loader";
 
 const UserLoginPage = () => {
-  const [email, setEmail] = useState('user@demo.com');
-  const [password, setPassword] = useState('User@123');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { isAuthenticated, role, status, error } = useSelector((state) => state.auth);
+  const { isAuthenticated, role, status, error } = useSelector(
+    (state) => state.auth
+  );
 
   useEffect(() => {
-    if (isAuthenticated && role === 'user') {
-      navigate('/my-dashboard');
+    if (isAuthenticated && role === "user") {
+      navigate("/my-dashboard", { replace: true });
     }
   }, [isAuthenticated, role, navigate]);
 
@@ -27,9 +30,13 @@ const UserLoginPage = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded shadow-md">
         <h2 className="text-2xl font-bold text-center">User Login</h2>
+
         <form className="space-y-6" onSubmit={handleSubmit}>
+          {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
             <input
               type="email"
               value={email}
@@ -38,8 +45,12 @@ const UserLoginPage = () => {
               required
             />
           </div>
+
+          {/* Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
             <input
               type="password"
               value={password}
@@ -48,23 +59,35 @@ const UserLoginPage = () => {
               required
             />
           </div>
-          {status === 'failed' && <p className="text-red-500 text-sm">{error}</p>}
+
+          {status === "failed" && (
+            <p className="text-red-500 text-sm">{error}</p>
+          )}
+
           <button
             type="submit"
+            disabled={status === "loading"}
             className="w-full px-4 py-2 font-bold text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
-            disabled={status === 'loading'}
           >
-            {status === 'loading' ? <Loader /> : 'Login'}
+            {status === "loading" ? <Loader /> : "Login"}
           </button>
         </form>
+
         <p className="text-sm text-center text-gray-600">
-          New here?{' '}
-          <Link to="/user/signup" className="font-medium text-blue-600 hover:underline">
+          New here?{" "}
+          <Link
+            to="/user/signup"
+            className="font-medium text-blue-600 hover:underline"
+          >
             Create an account
           </Link>
         </p>
+
         <p className="text-sm text-center text-gray-400">
-          <Link to="/login" className="font-medium text-gray-500 hover:underline">
+          <Link
+            to="/admin-login"
+            className="font-medium text-gray-500 hover:underline"
+          >
             Admin Login
           </Link>
         </p>

@@ -1,53 +1,69 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getMyPostHistory, analyzePost } from '../../api/userPostApi';
 
+// -----------------------------------------------
+// Initial State
+// -----------------------------------------------
 const initialState = {
   posts: [],
   status: 'idle',
   error: null,
 };
 
-// ✅ Fetch user's own posts
+// -----------------------------------------------
+// Async Thunks
+// -----------------------------------------------
+
+// Fetch user's post history
 export const fetchMyPosts = createAsyncThunk(
   'userPosts/fetchMyPosts',
   async (_, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.token;
-      if (!token) throw new Error('Missing authentication token');
-      return await getMyPostHistory(token);
-    } catch (err) {
-      return thunkAPI.rejectWithValue(err.message);
+      const data = await getMyPostHistory(token);
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error?.response?.data?.message || error.message
+      );
     }
   }
 );
 
-// ✅ Create and analyze new post
+// Create + analyze a new post
 export const createNewPost = createAsyncThunk(
   'userPosts/createNewPost',
   async (postData, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.token;
-      if (!token) throw new Error('Missing authentication token');
-      return await analyzePost(postData, token);
-    } catch (err) {
-      return thunkAPI.rejectWithValue(err.message);
+      const data = await analyzePost(postData, token);
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error?.response?.data?.message || error.message
+      );
     }
   }
 );
 
-export const userPostSlice = createSlice({
+// -----------------------------------------------
+// Slice
+// -----------------------------------------------
+const userPostSlice = createSlice({
   name: 'userPosts',
   initialState,
   reducers: {},
+
   extraReducers: (builder) => {
     builder
-      // Fetch posts
+      // Fetch post history
       .addCase(fetchMyPosts.pending, (state) => {
         state.status = 'loading';
+        state.error = null;
       })
       .addCase(fetchMyPosts.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.posts = action.payload || [];
+        state.posts = action.payload;
       })
       .addCase(fetchMyPosts.rejected, (state, action) => {
         state.status = 'failed';
@@ -60,7 +76,7 @@ export const userPostSlice = createSlice({
       })
       .addCase(createNewPost.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        if (action.payload) state.posts.unshift(action.payload);
+        state.posts.unshift(action.payload); // Add new post at top
       })
       .addCase(createNewPost.rejected, (state, action) => {
         state.status = 'failed';

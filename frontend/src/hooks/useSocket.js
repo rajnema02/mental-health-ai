@@ -1,34 +1,40 @@
-import { useEffect, useRef } from 'react';
-import { useDispatch } from '../store/reduxShim';
-import { socket } from '../utils/socketClient';
-// import { addLiveMapPoint } from '../store/slices/mapSlice';
+import { useEffect, useRef } from "react";
+import { useDispatch } from "react-redux";
+import { socket } from "../utils/socketClient";
+import { addLiveMapPoint } from "../store/slices/mapSlice";
 
 export const useSocket = () => {
   const dispatch = useDispatch();
   const mounted = useRef(false);
 
-  // useEffect(() => {
-  //   if (mounted.current) return; // ✅ prevent StrictMode double-run
-  //   mounted.current = true;
+  useEffect(() => {
+    // Prevent double execution in React StrictMode
+    if (mounted.current) return;
+    mounted.current = true;
 
-  //   if (!socket.connected) socket.connect();
+    // Ensure socket is connected
+    if (!socket.connected) {
+      try {
+        socket.connect();
+      } catch (err) {
+        console.error("Socket connection failed:", err);
+      }
+    }
 
-  //   const onNewDataPoint = (dataPoint) => {
-  //     if (dataPoint && typeof dataPoint === 'object') {
-  //       try {
-  //         dispatch(addLiveMapPoint(dataPoint));
-  //       } catch (err) {
-  //         console.error('Dispatch failed:', err);
-  //       }
-  //     }
-  //   };
+    // Listener for incoming data
+    const onNewDataPoint = (dataPoint) => {
+      if (dataPoint && typeof dataPoint === "object") {
+        dispatch(addLiveMapPoint(dataPoint));
+      }
+    };
 
-  //   socket.on('new-data-point', onNewDataPoint);
+    socket.on("new-data-point", onNewDataPoint);
 
-  //   return () => {
-  //     socket.off('new-data-point', onNewDataPoint);
-  //     socket.disconnect();
-  //     mounted.current = false;
-  //   };
-  // }, [dispatch]);
+    // Cleanup on unmount
+    return () => {
+      socket.off("new-data-point", onNewDataPoint);
+      socket.disconnect();
+      mounted.current = false;
+    };
+  }, [dispatch]);
 };

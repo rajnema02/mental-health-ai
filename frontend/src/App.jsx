@@ -1,98 +1,73 @@
-import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { useSelector } from './store/reduxShim';
+import { Routes, Route } from "react-router-dom";
 
-// Layouts
-import AdminLayout from './components/layout/AdminLayout.jsx';
+import AdminLoginPage from "./pages/AdminLoginPage";
+import UserLoginPage from "./pages/UserLoginPage";
+import UserSignupPage from "./pages/UserSignupPage";
 
-// Admin Pages
-import AdminLoginPage from './pages/AdminLoginPage'; // Renamed for clarity
-import DashboardPage from './pages/DashboardPage';
-import AlertsPage from './pages/AlertsPage';
+import DashboardPage from "./pages/DashboardPage";
+import AlertsPage from "./pages/AlertsPage";
+import UserDashboardPage from "./pages/UserDashboardPage";
 
-// Public User Pages
-import UserLoginPage from './pages/UserLoginPage';
-import UserSignupPage from './pages/UserSignupPage';
-import UserDashboardPage from './pages/UserDashboardPage';
+import Sidebar from "./components/layout/Sidebar";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import AdminRoute from "./routes/AdminRoute";
 
-// This component protects Admin routes
-const AdminProtectedRoute = () => {
-  const data = useSelector((state) => state.auth);
-  console.log(data,"data appjsx")
-  const { isAuthenticated, role } = useSelector((state) => state.auth);
-  return isAuthenticated && role === 'admin' ? (
-    <AdminLayout />
-  ) : (
-    <Navigate to="/login" replace />
-  );
-};
-
-// This component protects User routes
-const UserProtectedRoute = () => {
-  const { isAuthenticated, role } = useSelector((state) => state.auth);
-  return isAuthenticated && role === 'user' ? (
-    <Outlet /> // Renders child routes (e.g., UserDashboardPage)
-  ) : (
-    <Navigate to="/user/login" replace />
-  );
-};
-
-function App() {
-  // const { isAuthenticated, role } = useSelector((state) => state.auth);
-  const isAuthenticated = false;
-  const role = "user";
-
+export default function App() {
   return (
     <Routes>
-      {/* Public Routes (for anyone) */}
+      {/* PUBLIC ROUTES */}
+      <Route path="/admin-login" element={<AdminLoginPage />} />
+      <Route path="/" element={<UserLoginPage />} />
+      <Route path="/user-signup" element={<UserSignupPage />} />
+
+      {/* USER-PROTECTED ROUTE */} 
       <Route
-        path="/login"
+        path="/my-dashboard"
         element={
-          isAuthenticated && role === 'admin' ? (
-            <Navigate to="/" />
-          ) : (
-            <AdminLoginPage />
-          )
-        }
-      />
-      <Route
-        path="/user/login"
-        element={
-          isAuthenticated && role === 'user' ? (
-            <Navigate to="/my-dashboard" />
-          ) : (
-            <UserLoginPage />
-          )
-        }
-      />
-      <Route
-        path="/user/signup"
-        element={
-          isAuthenticated && role === 'user' ? (
-            <Navigate to="/my-dashboard" />
-          ) : (
-            <UserSignupPage />
-          )
+          <ProtectedRoute>
+            <UserDashboardPage />
+          </ProtectedRoute>
         }
       />
 
-      {/* Admin Protected Routes */}
-      <Route element={<AdminProtectedRoute />}>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/alerts" element={<AlertsPage />} />
-      </Route>
+      {/* ADMIN-PROTECTED ROUTES */}
+      <Route
+        path="/admin-dashboard"
+        element={
+          <AdminRoute>
+            <div className="flex">
+              <Sidebar />
+              <div className="flex-1 p-4">
+                <DashboardPage />
+              </div>
+            </div>
+          </AdminRoute>
+        }
+      />
 
-      {/* User Protected Routes */}
-      <Route element={<UserProtectedRoute />}>
-        <Route path="/my-dashboard" element={<UserDashboardPage />} />
-      </Route>
+      <Route
+        path="/alerts"
+        element={
+          <AdminRoute>
+            <div className="flex">
+              <Sidebar />
+              <div className="flex-1 p-4">
+                <AlertsPage />
+              </div>
+            </div>
+          </AdminRoute>
+        }
+      />
 
-      {/* Fallback route */}
+      {/* 404 */}
       <Route
         path="*"
-        element={<Navigate to={isAuthenticated && role === 'admin' ? '/' : '/user/login'} />}
+        element={
+          <div className="flex items-center justify-center h-screen text-3xl">
+            404 – Page Not Found
+          </div>
+        }
       />
     </Routes>
   );
 }
-
-export default App;

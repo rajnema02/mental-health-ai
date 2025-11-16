@@ -1,37 +1,33 @@
-const official = require('../models/official.js');
+const Official = require('../models/official');   // FIX: use correct model name
 const jwt = require('jsonwebtoken');
 const { jwtSecret } = require('../../config/env');
 
 const authMiddleware = async (req, res, next) => {
   let token;
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
-  ) {
+
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
-      // Get token from header
+      // Extract token
       token = req.headers.authorization.split(' ')[1];
 
       // Verify token
       const decoded = jwt.verify(token, jwtSecret);
 
-      // Get user from the token (excluding password)
+      // Load official user
       req.official = await Official.findById(decoded.id).select('-password');
 
       if (!req.official) {
-        return res.status(401).json({ message: 'Not authorized, user not found' });
+        return res.status(401).json({ message: 'Not authorized: user not found' });
       }
 
-      next();
+      return next();   // SUCCESS
     } catch (error) {
       console.error(error);
-      res.status(401).json({ message: 'Not authorized, token failed' });
+      return res.status(401).json({ message: 'Not authorized: token failed' });
     }
   }
 
-  if (!token) {
-    res.status(401).json({ message: 'Not authorized, no token' });
-  }
+  return res.status(401).json({ message: 'Not authorized: no token' });
 };
 
 module.exports = authMiddleware;

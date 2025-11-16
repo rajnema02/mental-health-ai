@@ -1,79 +1,52 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getAlerts, createAlert, deleteAlert } from '../../api/alertsApi';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { getAlerts, createAlert, deleteAlert } from "../../api/alertsApi";
 
-const initialState = { alerts: [], status: 'idle', error: null };
-
-// ✅ Fetch all alerts
 export const fetchAlerts = createAsyncThunk(
-  'alerts/fetchAlerts',
+  "alerts/fetchAlerts",
   async (_, thunkAPI) => {
-    try {
-      const token = thunkAPI.getState().auth.token;
-      if (!token) throw new Error('Missing authentication token');
-      return await getAlerts(token);
-    } catch (err) {
-      return thunkAPI.rejectWithValue(err.message);
-    }
+    const token = thunkAPI.getState().auth.token;
+    return await getAlerts(token);   // ✔ send token
   }
 );
 
-// ✅ Add new alert
 export const addAlert = createAsyncThunk(
-  'alerts/addAlert',
+  "alerts/addAlert",
   async (alertData, thunkAPI) => {
-    try {
-      const token = thunkAPI.getState().auth.token;
-      if (!token) throw new Error('Missing authentication token');
-      return await createAlert(alertData, token);
-    } catch (err) {
-      return thunkAPI.rejectWithValue(err.message);
-    }
+    const token = thunkAPI.getState().auth.token;
+    return await createAlert(alertData, token);  // ✔ send token
   }
 );
 
-// ✅ Delete alert
 export const removeAlert = createAsyncThunk(
-  'alerts/removeAlert',
+  "alerts/removeAlert",
   async (id, thunkAPI) => {
-    try {
-      const token = thunkAPI.getState().auth.token;
-      if (!token) throw new Error('Missing authentication token');
-      await deleteAlert(id, token);
-      return id;
-    } catch (err) {
-      return thunkAPI.rejectWithValue(err.message);
-    }
+    const token = thunkAPI.getState().auth.token;
+    await deleteAlert(id, token);   // ✔ send token
+    return id;
   }
 );
 
-export const alertsSlice = createSlice({
-  name: 'alerts',
-  initialState,
+const alertsSlice = createSlice({
+  name: "alerts",
+  initialState: {
+    alerts: [],
+    status: "idle",
+  },
   reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchAlerts.pending, (state) => {
-        state.status = 'loading';
+        state.status = "loading";
       })
       .addCase(fetchAlerts.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.alerts = action.payload || [];
-      })
-      .addCase(fetchAlerts.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload;
+        state.status = "succeeded";
+        state.alerts = action.payload;
       })
       .addCase(addAlert.fulfilled, (state, action) => {
         state.alerts.push(action.payload);
       })
-      .addCase(addAlert.rejected, (state, action) => {
-        state.error = action.payload;
-      })
       .addCase(removeAlert.fulfilled, (state, action) => {
-        state.alerts = state.alerts.filter((a) => a._id !== action.payload);
-      })
-      .addCase(removeAlert.rejected, (state, action) => {
-        state.error = action.payload;
+        state.alerts = state.alerts.filter(a => a._id !== action.payload);
       });
   },
 });
