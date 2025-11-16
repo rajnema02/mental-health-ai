@@ -10,7 +10,7 @@ export const adminLogin = async (email, password) => {
       password,
     }
   );
-  return response.data; // { _id, name, email, token }
+  return response.data;
 };
 
 // --- User Auth ---
@@ -19,7 +19,7 @@ export const userLogin = async (email, password) => {
     email,
     password,
   });
-  return response.data; // { _id, name, email, token }
+  return response.data;
 };
 
 export const userSignup = async (name, email, password) => {
@@ -28,5 +28,5 @@ export const userSignup = async (name, email, password) => {
     email,
     password,
   });
-  return response.data; // { _id, name, email, token }
+  return response.data;
 };
