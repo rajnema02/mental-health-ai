@@ -1,21 +1,22 @@
-const express = require('express');
-const router = express.Router();
-
-const adminAuth = require('../middleware/adminMiddleware');  // FIX: import admin auth
-const {
+// backend/src/api/routes/alertRoutes.js
+import express from "express";
+import adminAuth from "../middleware/adminMiddleware.js";
+import {
   createAlert,
   getAlerts,
   deleteAlert,
-} = require('../controller/alertController');
+} from "../controller/alertController.js";
 
-// Protect ALL alert routes
+const router = express.Router();
+
+// Protect all routes
 router.use(adminAuth);
 
-router.route('/')
-  .post(createAlert)
-  .get(getAlerts);
+router.route("/")
+  .get(getAlerts)
+  .post(createAlert);
 
-router.route('/:id')
+router.route("/:id")
   .delete(deleteAlert);
 
-module.exports = router;
+export default router;

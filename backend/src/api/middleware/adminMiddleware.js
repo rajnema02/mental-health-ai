@@ -1,57 +1,19 @@
-const jwt = require("jsonwebtoken");
-const Official = require("../models/official"); // IMPORTANT: case-sensitive
+import jwt from "jsonwebtoken";
+import Official from "../models/official.js";
 
-// =============================================
-//        ADMIN AUTH MIDDLEWARE
-// =============================================
-const adminMiddleware = async (req, res, next) => {
+export default async function adminAuth(req, res, next) {
   try {
-    let token;
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "Admin token missing" });
 
-    // ---- 1. Extract token from Authorization header ----
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer")
-    ) {
-      token = req.headers.authorization.split(" ")[1];
-    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_ADMIN);
+    const admin = await Official.findById(decoded.id);
 
-    // ---- 2. If token missing ----
-    if (!token) {
-      return res.status(401).json({
-        message: "Not authorized: No token provided",
-      });
-    }
+    if (!admin) return res.status(401).json({ message: "Admin not found" });
 
-    // ---- 3. Verify token using ADMIN secret ----
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_OFFICIAL);
-
-    // ---- 4. Fetch admin user ----
-    const adminUser = await Official.findById(decoded.id).select("-password");
-
-    if (!adminUser) {
-      return res.status(401).json({
-        message: "Not authorized: Admin not found",
-      });
-    }
-
-    // ---- 5. Role check ----
-    if (adminUser.role !== "admin") {
-      return res.status(403).json({
-        message: "Access denied: Not an admin",
-      });
-    }
-
-    // Attach admin info to request object
-    req.admin = adminUser;
-
+    req.official = admin;
     next();
   } catch (err) {
-    console.error("ADMIN AUTH ERROR:", err);
-    return res.status(401).json({
-      message: "Not authorized: Invalid or expired token",
-    });
+    return res.status(401).json({ message: "Invalid token" });
   }
-};
-
-module.exports = adminMiddleware;
+}

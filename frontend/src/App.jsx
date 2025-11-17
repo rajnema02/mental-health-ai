@@ -1,75 +1,26 @@
-import { Routes, Route } from "react-router-dom";
-
-import AdminLoginPage from "./pages/AdminLoginPage";
-import UserLoginPage from "./pages/UserLoginPage";
-import UserSignupPage from "./pages/UserSignupPage";
-
-import DashboardPage from "./pages/DashboardPage";
-import AlertsPage from "./pages/AlertsPage";
-import UserDashboardPage from "./pages/UserDashboardPage";
-
-import Sidebar from "./components/layout/Sidebar";
-import ProtectedRoute from "./routes/ProtectedRoute";
-import AdminRoute from "./routes/AdminRoute";
-import AdminSignupPage from "./pages/AdminSignupPage";
+import { Routes, Route, Navigate } from 'react-router-dom';
+import AdminLoginPage from './pages/AdminLoginPage';
+import AdminSignupPage from './pages/AdminSignupPage';
+import UserLoginPage from './pages/UserLoginPage';
+import UserSignupPage from './pages/UserSignupPage';
+import DashboardPage from './pages/DashboardPage';
+import AlertsPage from './pages/AlertsPage';
+import UserDashboardPage from './pages/UserDashboardPage';
+import AdminRoute from './routes/AdminRoute';
+import ProtectedRoute from './routes/ProtectedRoute';
 
 export default function App() {
   return (
     <Routes>
-      {/* PUBLIC ROUTES */}
       <Route path="/admin-login" element={<AdminLoginPage />} />
       <Route path="/admin-signup" element={<AdminSignupPage />} />
-      <Route path="/" element={<UserLoginPage />} />
-      <Route path="/user-signup" element={<UserSignupPage />} />
-
-      {/* USER-PROTECTED ROUTE */} 
-      <Route
-        path="/my-dashboard"
-        element={
-          <ProtectedRoute>
-            <UserDashboardPage />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* ADMIN-PROTECTED ROUTES */}
-      <Route
-        path="/admin-dashboard"
-        element={
-          <AdminRoute>
-            <div className="flex">
-              <Sidebar />
-              <div className="flex-1 p-4">
-                <DashboardPage />
-              </div>
-            </div>
-          </AdminRoute>
-        }
-      />
-
-      <Route
-        path="/alerts"
-        element={
-          <AdminRoute>
-            <div className="flex">
-              <Sidebar />
-              <div className="flex-1 p-4">
-                <AlertsPage />
-              </div>
-            </div>
-          </AdminRoute>
-        }
-      />
-
-      {/* 404 */}
-      <Route
-        path="*"
-        element={
-          <div className="flex items-center justify-center h-screen text-3xl">
-            404 – Page Not Found
-          </div>
-        }
-      />
+      <Route path="/login" element={<UserLoginPage />} />
+      <Route path="/signup" element={<UserSignupPage />} />
+      <Route path="/my-dashboard" element={<ProtectedRoute><UserDashboardPage /></ProtectedRoute>} />
+      <Route path="/admin-dashboard" element={<AdminRoute><DashboardPage /></AdminRoute>} />
+      <Route path="/alerts" element={<AdminRoute><AlertsPage /></AdminRoute>} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<div className="p-8">404 - Not Found</div>} />
     </Routes>
   );
 }

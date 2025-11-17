@@ -1,37 +1,15 @@
 import { NavLink } from 'react-router-dom';
 
 const Sidebar = () => {
-  const linkClass = 'block px-4 py-2 rounded hover:bg-gray-700';
-  const activeLinkClass = 'bg-gray-700';
-
+  const linkClass = ({ isActive }) => `block px-4 py-2 rounded ${isActive ? 'bg-gray-700 text-white' : 'text-gray-200 hover:bg-gray-600'}`;
   return (
-    <div className="w-64 h-screen p-4 text-white bg-gray-800">
-      <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
+    <aside className="w-64 bg-gray-800 text-white h-screen p-4">
+      <h2 className="text-xl font-bold mb-4">Project Vesta</h2>
       <nav>
-        <ul>
-          <li>
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                `${linkClass} ${isActive ? activeLinkClass : ''}`
-              }
-            >
-              Live Map
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/alerts"
-              className={({ isActive }) =>
-                `${linkClass} ${isActive ? activeLinkClass : ''}`
-              }
-            >
-              Manage Alerts
-            </NavLink>
-          </li>
-        </ul>
+        <NavLink to="/admin-dashboard" className={linkClass}>Dashboard</NavLink>
+        <NavLink to="/alerts" className={linkClass}>Alerts</NavLink>
       </nav>
-    </div>
+    </aside>
   );
 };
 

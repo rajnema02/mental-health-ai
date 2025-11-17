@@ -3,23 +3,35 @@ import { getAlerts, createAlert, deleteAlert } from "../../api/alertsApi";
 
 export const fetchAlerts = createAsyncThunk(
   "alerts/fetchAlerts",
-  async () => {
-    return await getAlerts();  // token auto-attached by interceptor
+  async (_, thunkAPI) => {
+    try {
+      return await getAlerts();
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+    }
   }
 );
 
 export const addAlert = createAsyncThunk(
   "alerts/addAlert",
-  async (alertData) => {
-    return await createAlert(alertData);  // token auto-attached
+  async (alertData, thunkAPI) => {
+    try {
+      return await createAlert(alertData);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+    }
   }
 );
 
 export const removeAlert = createAsyncThunk(
   "alerts/removeAlert",
-  async (id) => {
-    await deleteAlert(id);  // token auto-attached
-    return id;
+  async (id, thunkAPI) => {
+    try {
+      await deleteAlert(id);
+      return id;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+    }
   }
 );
 
@@ -28,6 +40,7 @@ const alertsSlice = createSlice({
   initialState: {
     alerts: [],
     status: "idle",
+    error: null,
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -39,9 +52,15 @@ const alertsSlice = createSlice({
         state.status = "succeeded";
         state.alerts = action.payload;
       })
+      .addCase(fetchAlerts.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
+      })
+
       .addCase(addAlert.fulfilled, (state, action) => {
         state.alerts.push(action.payload);
       })
+
       .addCase(removeAlert.fulfilled, (state, action) => {
         state.alerts = state.alerts.filter((a) => a._id !== action.payload);
       });

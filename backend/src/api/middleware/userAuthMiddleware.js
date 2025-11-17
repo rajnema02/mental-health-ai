@@ -1,31 +1,19 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
-const userAuthMiddleware = async (req, res, next) => {
-  let token;
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
-  ) {
-    try {
-      token = req.headers.authorization.split(' ')[1];
+export default async function userAuth(req, res, next) {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "User token missing" });
 
-      // Use the USER secret, not the admin one
-      const decoded = jwt.verify(token, process.env.JWT_SECRET_USER);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_USER);
+    const user = await User.findById(decoded.id);
 
-      req.user = await User.findById(decoded.id).select('-password');
+    if (!user) return res.status(401).json({ message: "User not found" });
 
-      if (!req.user) {
-        return res.status(401).json({ message: 'Not authorized, user not found' });
-      }
-      next();
-    } catch (error) {
-      res.status(401).json({ message: 'Not authorized, token failed' });
-    }
+    req.user = user;
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid token" });
   }
-  if (!token) {
-    res.status(401).json({ message: 'Not authorized, no token' });
-  }
-};
-
-module.exports = userAuthMiddleware;
+}

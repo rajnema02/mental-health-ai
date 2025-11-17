@@ -1,56 +1,61 @@
-require('dotenv').config();
-const http = require('http');
-const express = require('express');
-const cors = require('cors');
-const { Server } = require('socket.io');
+import express from "express";
+import http from "http";
+import dotenv from "dotenv";
+import helmet from "helmet";
+import cors from "cors";
+import morgan from "morgan";
+import cookieParser from "cookie-parser";
+import { Server as SocketIOServer } from "socket.io";
+import connectDB from "../backend/src/config/db.js";
 
-const connectDB = require('./src/config/db');
-const socketManager = require('./src/services/socketManager');
-const pipeline = require('./src/pipeline/index');
-const adminAuthMiddleware = require('./src/api/middleware/adminMiddleware');
+import authRoutes from "./src/api/routes/authRoutes.js";
+import postRoutes from "./src/api/routes/postRoutes.js";
+import statsRoutes from "./src/api/routes/statsRoutes.js";
+import alertsRoutes from "./src/api/routes/alertRoutes.js";
 
-// --- Initialization ---
+dotenv.config();
+const PORT = process.env.PORT || 5000;
+
 const app = express();
 const server = http.createServer(app);
 
-// Connect to Database
+/* ---------- MIDDLEWARE ---------- */
+app.use(helmet());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "10mb" }));
+app.use(cookieParser());
+app.use(morgan("dev"));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  })
+);
+
+/* ---------- DB CONNECT ---------- */
 connectDB();
 
-// --- Middleware ---
-app.use(cors()); // Allow cross-origin requests
-app.use(express.json()); // Parse JSON bodies
+/* ---------- ROUTES ---------- */
+app.use("/api/auth", authRoutes);
+app.use("/api/posts", postRoutes);
+app.use("/api/stats", statsRoutes);
+app.use("/api/alerts", alertsRoutes);
 
-// --- Socket.IO Setup ---
-socketManager.init(server);
-
-// --- API Routes ---
-
-// NEW: User Auth Routes
-app.use('/api/auth/user', require('./src/api/routes/userAuthRoutes'));
-
-// NEW: User Post Routes (protected by userAuthMiddleware inside the file)
-app.use('/api/posts', require('./src/api/routes/userPostRoutes'));
-
-// Admin Auth Routes
-app.use('/api/auth/official', require('./src/api/routes/authRoutes'));
-
-app.use("/api/admin", require("./src/api/routes/adminRoutes"));
-
-
-// Admin Protected Routes
-app.use('/api/alerts', adminAuthMiddleware, require('./src/api/routes/alertRoutes'));
-app.use('/api/stats', adminAuthMiddleware, require('./src/api/routes/statsRoutes'));
-
-// --- Health Check Route ---
-app.get('/', (req, res) => {
-  res.send('Project Vesta Hybrid Backend is running.');
+/* ---------- SOCKET.IO ---------- */
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true,
+  },
 });
 
-// --- Start Data Pipeline ---
-pipeline.start();
+app.set("io", io);
 
-// --- Start Server ---
-const PORT = process.env.PORT || 5000;
+io.on("connection", (socket) => {
+  console.log("Socket connected:", socket.id);
+});
+
+/* ---------- START SERVER ---------- */
 server.listen(PORT, () => {
-  console.log(`Server listening on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on PORT ${PORT}`);
 });

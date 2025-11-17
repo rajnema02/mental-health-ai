@@ -1,31 +1,28 @@
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchAlerts, removeAlert } from "../../store/slices/alertsSlice";
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAlerts, removeAlert } from '../../store/slices/alertsSlice';
+import Loader from '../common/Loader';
 
 const AlertList = () => {
   const dispatch = useDispatch();
-  const { alerts, status } = useSelector((state) => state.alerts);
+  const { alerts, status } = useSelector(s => s.alerts);
 
   useEffect(() => {
-    dispatch(fetchAlerts());   // ✔ correct
+    dispatch(fetchAlerts());
   }, [dispatch]);
 
+  if (status === 'loading') return <Loader />;
+
   return (
-    <div className="p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Your Active Alerts</h2>
-
-      {status === "loading" && <p>Loading...</p>}
-
-      <ul className="space-y-2">
-        {alerts.map((alert) => (
-          <li key={alert._id} className="flex justify-between p-2 border">
-            <span>{alert.name}</span>
-            <button
-              onClick={() => dispatch(removeAlert(alert._id))}
-              className="px-3 py-1 text-white bg-red-600 rounded"
-            >
-              Delete
-            </button>
+    <div className="bg-white p-4 rounded shadow">
+      <h3 className="font-semibold mb-2">Active Alerts</h3>
+      <ul>
+        {alerts.map(a => (
+          <li key={a._id} className="flex justify-between items-center py-2 border-b">
+            <div>{a.name}</div>
+            <div>
+              <button className="px-3 py-1 bg-red-600 text-white rounded" onClick={() => dispatch(removeAlert(a._id))}>Delete</button>
+            </div>
           </li>
         ))}
       </ul>

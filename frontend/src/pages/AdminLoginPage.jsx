@@ -1,90 +1,35 @@
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { loginAdmin } from "../store/slices/authSlice";
-import { Link, useNavigate } from "react-router-dom";
-import Loader from "../components/common/Loader";
+import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginAdmin } from '../store/slices/authSlice';
+import { useNavigate, Link } from 'react-router-dom';
+import Loader from '../components/common/Loader';
 
 const AdminLoginPage = () => {
+  const [email, setEmail] = useState('official@demo.com');
+  const [password, setPassword] = useState('Official@123');
   const dispatch = useDispatch();
+  const { isAuthenticated, role, status, error } = useSelector(s => s.auth);
   const navigate = useNavigate();
 
-  const { status, error, isAuthenticated, role } = useSelector(
-    (state) => state.auth
-  );
+  useEffect(() => {
+    if (isAuthenticated && role === 'admin') navigate('/admin-dashboard');
+  }, [isAuthenticated, role, navigate]);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  // Redirect admin after successful login
-  if (isAuthenticated && role === "admin") {
-    navigate("/admin-dashboard");
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!email || !password) {
-      alert("Please enter both email and password.");
-      return;
-    }
-
-    dispatch(loginAdmin({ email, password }));
-  };
+  const submit = (e) => { e.preventDefault(); dispatch(loginAdmin({ email, password })); };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6">
-        <h1 className="text-2xl font-bold mb-4 text-center">Admin Login</h1>
-
-        {/* ERROR MESSAGE */}
-        {error && (
-          <p className="text-red-600 text-sm mb-3 text-center">
-            {error}
-          </p>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* EMAIL */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
-            <input
-              type="email"
-              className="w-full border px-3 py-2 rounded"
-              placeholder="admin@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-
-          {/* PASSWORD */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Password</label>
-            <input
-              type="password"
-              className="w-full border px-3 py-2 rounded"
-              placeholder="••••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-
-          {/* SUBMIT BUTTON */}
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 disabled:opacity-50"
-            disabled={status === "loading"}
-          >
-            {status === "loading" ? <Loader /> : "Login"}
-          </button>
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white p-6 rounded shadow">
+        <h2 className="text-xl mb-4">Admin Login</h2>
+        <form onSubmit={submit}>
+          <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" className="w-full p-2 border rounded mb-2" required />
+          <input value={password} onChange={e=>setPassword(e.target.value)} type="password" placeholder="Password" className="w-full p-2 border rounded mb-3" required />
+          {status === 'loading' ? <Loader /> : <button className="w-full px-4 py-2 bg-blue-600 text-white rounded">Login</button>}
+          {status === 'failed' && <div className="text-red-500 mt-2">{error}</div>}
         </form>
-        <p className="text-sm text-center text-gray-400">
-          <Link
-            to="/admin-signup"
-            className="font-medium text-gray-500 hover:underline"
-          >
-            Admin Signup
-          </Link>
-        </p>
+        <div className="mt-3 text-sm">
+          <Link to="/admin-signup" className="text-blue-600">Create admin account</Link>
+        </div>
       </div>
     </div>
   );
