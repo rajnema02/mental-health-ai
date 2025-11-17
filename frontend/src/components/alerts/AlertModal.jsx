@@ -2,30 +2,45 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { addAlert } from '../../store/slices/alertsSlice';
 
+
 const AlertModal = ({ closeModal }) => {
-  const [name, setName] = useState('');
-  const dispatch = useDispatch();
+const [name, setName] = useState('');
+const dispatch = useDispatch();
 
-  const submit = (e) => {
-    e.preventDefault();
-    dispatch(addAlert({ name }));
-    closeModal();
-  };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white p-4 rounded w-full max-w-md">
-        <h3 className="font-semibold mb-2">Create Alert</h3>
-        <form onSubmit={submit}>
-          <input value={name} onChange={(e)=>setName(e.target.value)} placeholder="Alert name" className="w-full p-2 border rounded mb-3" required />
-          <div className="flex justify-end gap-2">
-            <button type="button" onClick={closeModal} className="px-3 py-1 bg-gray-200 rounded">Cancel</button>
-            <button type="submit" className="px-3 py-1 bg-blue-600 text-white rounded">Create</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
+const submit = e => {
+e.preventDefault();
+dispatch(addAlert({ name }));
+closeModal();
 };
+
+
+return (
+<>
+<style>{`
+.modal-bg{ position:fixed; inset:0; background:rgba(0,0,0,0.7); display:flex; justify-content:center; align-items:center; }
+.modal-box{ background:#141f33; padding:20px; width:90%; max-width:420px; border-radius:10px; color:white; }
+.modal-input{ width:100%; padding:10px; border-radius:6px; margin-bottom:10px; }
+`}</style>
+
+
+<div className="modal-bg">
+<div className="modal-box">
+<h3>Create Alert</h3>
+<form onSubmit={submit}>
+<input value={name} onChange={e=>setName(e.target.value)} className="modal-input" placeholder="Alert name" required />
+
+
+<div style={{ display:'flex', justifyContent:'flex-end', gap:'10px' }}>
+<button type="button" onClick={closeModal}>Cancel</button>
+<button type="submit">Create</button>
+</div>
+</form>
+</div>
+</div>
+</>
+);
+};
+
 
 export default AlertModal;

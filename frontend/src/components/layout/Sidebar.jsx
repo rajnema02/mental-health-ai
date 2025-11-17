@@ -1,15 +1,61 @@
-import { NavLink } from 'react-router-dom';
+// src/components/layout/Sidebar.jsx
+import { NavLink } from "react-router-dom";
 
 const Sidebar = () => {
-  const linkClass = ({ isActive }) => `block px-4 py-2 rounded ${isActive ? 'bg-gray-700 text-white' : 'text-gray-200 hover:bg-gray-600'}`;
   return (
-    <aside className="w-64 bg-gray-800 text-white h-screen p-4">
-      <h2 className="text-xl font-bold mb-4">Project Vesta</h2>
-      <nav>
-        <NavLink to="/admin-dashboard" className={linkClass}>Dashboard</NavLink>
-        <NavLink to="/alerts" className={linkClass}>Alerts</NavLink>
-      </nav>
-    </aside>
+    <>
+      <style>{`
+        .side-bar {
+          width: 240px;
+          background: #0f1a2e;
+          padding: 20px;
+          border-right: 1px solid #1e3050;
+          min-height: 100vh;
+        }
+        .side-title {
+          font-size: 1.4rem;
+          font-weight: 700;
+          margin-bottom: 20px;
+          color: white;
+        }
+        .side-link {
+          display: block;
+          padding: 10px 14px;
+          border-radius: 8px;
+          margin-bottom: 6px;
+          color: #d1d5db;
+          text-decoration: none;
+        }
+        .side-link-active {
+          background: #1a2744;
+          color: white;
+        }
+      `}</style>
+
+      <aside className="side-bar">
+        <div className="side-title">Admin Panel</div>
+
+        <nav>
+          <NavLink
+            to="/admin-dashboard"
+            className={({ isActive }) =>
+              isActive ? "side-link side-link-active" : "side-link"
+            }
+          >
+            Dashboard
+          </NavLink>
+
+          <NavLink
+            to="/alerts"
+            className={({ isActive }) =>
+              isActive ? "side-link side-link-active" : "side-link"
+            }
+          >
+            Alerts
+          </NavLink>
+        </nav>
+      </aside>
+    </>
   );
 };
 

@@ -1,37 +1,53 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { signupUser } from '../store/slices/authSlice';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Loader from '../components/common/Loader';
 
+
 const UserSignupPage = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const dispatch = useDispatch();
-  const { isAuthenticated, role, status, error } = useSelector(s => s.auth);
-  const navigate = useNavigate();
+const [name, setName] = useState('');
+const [email, setEmail] = useState('');
+const [password, setPassword] = useState('');
+const dispatch = useDispatch();
+const { isAuthenticated, role, status, error } = useSelector(s => s.auth);
+const navigate = useNavigate();
 
-  useEffect(() => {
-    if (isAuthenticated && role === 'user') navigate('/my-dashboard');
-  }, [isAuthenticated, role, navigate]);
 
-  const submit = (e) => { e.preventDefault(); dispatch(signupUser({ name, email, password })); };
+useEffect(() => { if(isAuthenticated && role==='user') navigate('/my-dashboard'); }, [isAuthenticated, role, navigate]);
 
-  return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white p-6 rounded shadow">
-        <h2 className="text-xl mb-4">Create Account</h2>
-        <form onSubmit={submit}>
-          <input value={name} onChange={e=>setName(e.target.value)} placeholder="Full name" className="w-full p-2 border rounded mb-2" required />
-          <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" className="w-full p-2 border rounded mb-2" required />
-          <input value={password} onChange={e=>setPassword(e.target.value)} type="password" placeholder="Password" className="w-full p-2 border rounded mb-3" required />
-          {status === 'loading' ? <Loader /> : <button className="w-full px-4 py-2 bg-blue-600 text-white rounded">Create Account</button>}
-          {status === 'failed' && <div className="text-red-500 mt-2">{error}</div>}
-        </form>
-      </div>
-    </div>
-  );
+
+const submit = e => { e.preventDefault(); dispatch(signupUser({ name, email, password })); };
+
+
+return (
+<>
+<style>{`
+.auth-wrapper{ min-height:100vh; display:flex; justify-content:center; align-items:center; padding:20px; background:#0d1526; }
+.auth-box{ background:#141f33; padding:22px; border-radius:12px; width:100%; max-width:420px; border:1px solid #1e3050; color:white; }
+.auth-input{ width:100%; padding:12px; border-radius:8px; background:#0f1a2e; border:1px solid #1e3050; margin-bottom:10px; color:white; }
+.auth-btn{ width:100%; background:#1a73e8; padding:12px; border-radius:8px; color:white; font-weight:bold; }
+`}</style>
+
+
+<div className="auth-wrapper">
+<div className="auth-box">
+<h2 style={{fontSize:'1.4rem', marginBottom:'14px'}}>Create Account</h2>
+<form onSubmit={submit}>
+<input value={name} onChange={e=>setName(e.target.value)} placeholder="Full name" className="auth-input" required />
+<input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" className="auth-input" required />
+<input value={password} onChange={e=>setPassword(e.target.value)} type="password" placeholder="Password" className="auth-input" required />
+
+
+{status==='loading' ? <Loader /> : <button className="auth-btn">Create Account</button>}
+{status==='failed' && <div style={{color:'red'}}>{error}</div>}
+</form>
+<div style={{marginTop:'12px'}}>
+<Link to="/login" style={{color:'#4ea8ff'}}>Already have an account? Log in</Link>
+</div>
+</div>
+</div>
+</>
+);
 };
-
 export default UserSignupPage;

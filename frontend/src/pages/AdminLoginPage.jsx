@@ -4,35 +4,66 @@ import { loginAdmin } from '../store/slices/authSlice';
 import { useNavigate, Link } from 'react-router-dom';
 import Loader from '../components/common/Loader';
 
+
 const AdminLoginPage = () => {
-  const [email, setEmail] = useState('official@demo.com');
-  const [password, setPassword] = useState('Official@123');
-  const dispatch = useDispatch();
-  const { isAuthenticated, role, status, error } = useSelector(s => s.auth);
-  const navigate = useNavigate();
+const [email, setEmail] = useState('');
+const [password, setPassword] = useState('');
+const dispatch = useDispatch();
+const { isAuthenticated, role, status, error } = useSelector(s => s.auth);
+const navigate = useNavigate();
 
-  useEffect(() => {
-    if (isAuthenticated && role === 'admin') navigate('/admin-dashboard');
-  }, [isAuthenticated, role, navigate]);
 
-  const submit = (e) => { e.preventDefault(); dispatch(loginAdmin({ email, password })); };
+useEffect(() => {
+if (isAuthenticated && role === 'admin') navigate('/admin-dashboard');
+}, [isAuthenticated, role, navigate]);
 
-  return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white p-6 rounded shadow">
-        <h2 className="text-xl mb-4">Admin Login</h2>
-        <form onSubmit={submit}>
-          <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" className="w-full p-2 border rounded mb-2" required />
-          <input value={password} onChange={e=>setPassword(e.target.value)} type="password" placeholder="Password" className="w-full p-2 border rounded mb-3" required />
-          {status === 'loading' ? <Loader /> : <button className="w-full px-4 py-2 bg-blue-600 text-white rounded">Login</button>}
-          {status === 'failed' && <div className="text-red-500 mt-2">{error}</div>}
-        </form>
-        <div className="mt-3 text-sm">
-          <Link to="/admin-signup" className="text-blue-600">Create admin account</Link>
-        </div>
-      </div>
-    </div>
-  );
+
+const submit = (e) => { e.preventDefault(); dispatch(loginAdmin({ email, password })); };
+
+
+return (
+<>
+<style>{`
+.login-wrapper{
+min-height:100vh; display:flex; justify-content:center; align-items:center; padding:20px;
+background:#0d1526;
+}
+.login-box{
+background:#141f33; padding:24px; width:100%; max-width:420px; border-radius:12px;
+color:white; border:1px solid #1e3050;
+}
+.login-title{ font-size:1.4rem; margin-bottom:16px; text-align:center; }
+.login-input{
+width:100%; padding:12px; margin-bottom:10px; border-radius:8px;
+border:1px solid #1e3050; background:#0f1a2e; color:white;
+}
+.login-btn{
+width:100%; background:#1a73e8; padding:12px; border-radius:8px;
+color:white; font-weight:bold; margin-top:4px;
+}
+.login-link{ color:#4ea8ff; text-decoration:underline; font-size:0.9rem; }
+`}</style>
+
+
+<div className="login-wrapper">
+<div className="login-box">
+<h2 className="login-title">Admin Login</h2>
+<form onSubmit={submit}>
+<input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" className="login-input" required />
+<input value={password} onChange={e=>setPassword(e.target.value)} type="password" placeholder="Password" className="login-input" required />
+
+
+{status === 'loading' ? <Loader /> : <button className="login-btn">Login</button>}
+{status === 'failed' && <div style={{color:'red', marginTop:'8px'}}>{error}</div>}
+</form>
+
+
+<div style={{marginTop:'12px', textAlign:'center'}}>
+<Link to="/admin-signup" className="login-link">Create admin account</Link>
+</div>
+</div>
+</div>
+</>
+);
 };
-
 export default AdminLoginPage;

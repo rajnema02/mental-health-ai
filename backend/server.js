@@ -1,4 +1,5 @@
 import express from "express";
+import path from "path";
 import http from "http";
 import dotenv from "dotenv";
 import helmet from "helmet";
@@ -32,6 +33,15 @@ app.use(
   })
 );
 
+app.use(
+  "/uploads",
+  (req, res, next) => {
+    res.header("Access-Control-Allow-Origin", process.env.FRONTEND_URL || "http://localhost:5173");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+  },
+  express.static(path.join(process.cwd(), "uploads"))
+);
 /* ---------- DB CONNECT ---------- */
 connectDB();
 

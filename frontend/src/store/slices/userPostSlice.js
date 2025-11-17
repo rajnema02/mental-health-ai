@@ -1,7 +1,8 @@
+// src/store/slices/userPostSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getMyPosts, uploadUserPost, deleteUserPost } from "../../api/userPostApi";
 
-// Get all posts from logged-in user
+// Fetch all posts of logged-in user
 export const fetchMyPosts = createAsyncThunk(
   "userPosts/fetchMyPosts",
   async (_, thunkAPI) => {
@@ -34,16 +35,38 @@ const userPostSlice = createSlice({
   initialState: {
     posts: [],
     status: "idle",
+    error: null,
   },
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // FETCH
+      .addCase(fetchMyPosts.pending, (state) => {
+        state.status = "loading";
+      })
       .addCase(fetchMyPosts.fulfilled, (state, action) => {
+        state.status = "succeeded";
         state.posts = action.payload;
       })
-      .addCase(uploadPost.fulfilled, (state, action) => {
-        state.posts.unshift(action.payload);
+      .addCase(fetchMyPosts.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
       })
+
+      // UPLOAD
+      .addCase(uploadPost.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(uploadPost.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.posts.unshift(action.payload); // NEW POST AT TOP
+      })
+      .addCase(uploadPost.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+
+      // DELETE
       .addCase(deletePost.fulfilled, (state, action) => {
         state.posts = state.posts.filter((p) => p._id !== action.payload);
       });

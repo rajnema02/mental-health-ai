@@ -3,20 +3,33 @@ import AlertList from '../components/alerts/AlertList';
 import AlertModal from '../components/alerts/AlertModal';
 import { useState } from 'react';
 
+
 const AlertsPage = () => {
-  const [open, setOpen] = useState(false);
+const [open, setOpen] = useState(false);
 
-  return (
-    <AdminLayout>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold">Manage Alerts</h2>
-        <button className="px-3 py-1 bg-green-600 text-white rounded" onClick={() => setOpen(true)}>Create Alert</button>
-      </div>
 
-      <AlertList />
-      {open && <AlertModal closeModal={() => setOpen(false)} />}
-    </AdminLayout>
-  );
+return (
+<AdminLayout>
+<>
+<style>{`
+.alerts-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.alerts-title{ font-size:1.6rem; font-weight:600; color:white; }
+.alerts-btn{ background:#00b894; padding:8px 14px; border-radius:8px; color:white; font-weight:bold; }
+`}</style>
+
+
+<div className="alerts-header">
+<h2 className="alerts-title">Manage Alerts</h2>
+<button className="alerts-btn" onClick={() => setOpen(true)}>Create Alert</button>
+</div>
+
+
+<AlertList />
+{open && <AlertModal closeModal={() => setOpen(false)} />}
+</>
+</AdminLayout>
+);
 };
+
 
 export default AlertsPage;

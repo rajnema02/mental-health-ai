@@ -1,91 +1,60 @@
-// src/components/dashboard/LiveHeatMap.jsx
 import { MapContainer, TileLayer, Circle, Popup } from 'react-leaflet';
 import { useSelector } from 'react-redux';
 import 'leaflet/dist/leaflet.css';
 
-// Center of Bhopal
-const mapCenter = [23.2599, 77.4126];
 
-// Risk color helper
-const getRiskColor = (risk) => {
-  switch (risk) {
-    case 'high':
-      return 'red';
-    case 'medium':
-      return 'orange';
-    default:
-      return 'blue';
-  }
-};
+const mapCenter = [23.2599, 77.4126];
+const riskColor = r => r==='high'?'red':r==='medium'?'orange':'blue';
+
 
 const LiveHeatMap = () => {
-  // read from state.map (mapSlice stores dataPoints)
-  const { dataPoints = [], status } = useSelector((state) => state.map || {});
+const { dataPoints = [], status } = useSelector(state => state.map || {});
 
-  if (status === 'loading' && dataPoints.length === 0) {
-    return (
-      <div className="h-full flex items-center justify-center bg-white rounded shadow">
-        <p className="text-gray-600">Loading map...</p>
-      </div>
-    );
-  }
 
-  if (!Array.isArray(dataPoints) || dataPoints.length === 0) {
-    return (
-      <div className="h-full flex items-center justify-center bg-white rounded shadow">
-        <p className="text-gray-600">No map data available.</p>
-      </div>
-    );
-  }
+if (status === 'loading' && !dataPoints.length)
+return <div>Loading...</div>;
 
-  return (
-    <MapContainer
-      center={mapCenter}
-      zoom={12}
-      scrollWheelZoom={true}
-      style={{ height: '100%', width: '100%' }}
-    >
-      <TileLayer
-        attribution="&copy; OpenStreetMap contributors"
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
 
-      {dataPoints.map((point) => {
-        if (
-          !point ||
-          !point.location_geo ||
-          !Array.isArray(point.location_geo.coordinates) ||
-          point.location_geo.coordinates.length < 2
-        ) {
-          return null; // skip invalid data
-        }
+if (!dataPoints.length)
+return <div>No map data available.</div>;
 
-        const [lng, lat] = point.location_geo.coordinates;
 
-        return (
-          <Circle
-            key={point._id || `${lat}-${lng}-${Math.random()}`}
-            center={[lat, lng]}
-            radius={50}
-            pathOptions={{
-              color: getRiskColor(point.risk_level),
-              fillColor: getRiskColor(point.risk_level),
-              fillOpacity: 0.5,
-            }}
-          >
-            <Popup>
-              <div className="text-sm">
-                <div><strong>Risk:</strong> {point.risk_level || 'N/A'}</div>
-                <div><strong>Emotion:</strong> {point.emotion || 'N/A'}</div>
-                <div><strong>Topic:</strong> {point.topic ? point.topic.replace('_', ' ') : 'N/A'}</div>
-                <div className="text-xs text-gray-500 mt-1">{point.createdAt ? new Date(point.createdAt).toLocaleString() : ''}</div>
-              </div>
-            </Popup>
-          </Circle>
-        );
-      })}
-    </MapContainer>
-  );
+return (
+<>
+<style>{`
+.map-container{ height:400px; border-radius:10px; overflow:hidden; border:1px solid #1e3050; }
+@media(max-width:600px){ .map-container{ height:300px; } }
+`}</style>
+
+
+<div className="map-container">
+<MapContainer center={mapCenter} zoom={12} scrollWheelZoom style={{height:'100%', width:'100%'}}>
+<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+
+{dataPoints.map(point => {
+if (!point?.location_geo?.coordinates) return null;
+const [lng, lat] = point.location_geo.coordinates;
+
+
+return (
+<Circle key={point._id} center={[lat, lng]} radius={50} pathOptions={{ color:riskColor(point.risk_level), fillColor:riskColor(point.risk_level), fillOpacity:0.5 }}>
+<Popup>
+<div>
+<strong>Risk:</strong> {point.risk_level}<br />
+<strong>Emotion:</strong> {point.emotion}<br />
+<strong>Topic:</strong> {point.topic}<br />
+{new Date(point.createdAt).toLocaleString()}
+</div>
+</Popup>
+</Circle>
+);
+})}
+</MapContainer>
+</div>
+</>
+);
 };
+
 
 export default LiveHeatMap;

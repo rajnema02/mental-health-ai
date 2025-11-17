@@ -1,38 +1,30 @@
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../store/slices/authSlice";
 
+
 const Navbar = () => {
-  const dispatch = useDispatch();
+const dispatch = useDispatch();
+const { user, role, isAuthenticated } = useSelector((state) => state.auth);
 
-  // Get user info from Redux store
-  const { user, role, isAuthenticated } = useSelector((state) => state.auth);
 
-  const handleLogout = () => {
-    dispatch(logout());
-  };
+return (
+<>
+<style>{`
+.nav-bar{ background:#141f33; padding:16px; border-bottom:1px solid #1e3050; color:white; display:flex; justify-content:space-between; }
+.logout-btn{ background:#e63946; padding:8px 14px; border-radius:8px; color:white; }
+`}</style>
 
-  return (
-    <header className="flex items-center justify-between p-4 bg-white shadow-md">
-      <h1 className="text-xl font-bold">Project Vesta</h1>
 
-      <div className="flex items-center gap-4">
-        {/* Show logged in user */}
-        {isAuthenticated && (
-          <span className="text-gray-700 font-semibold">
-            {user?.name ? `Hello, ${user.name}` : role === "admin" ? "Admin" : "User"}
-          </span>
-        )}
+<header className="nav-bar">
+<h1 style={{fontSize:'1.4rem'}}>Project Vesta</h1>
 
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          className="px-4 py-2 font-semibold text-white bg-red-600 rounded hover:bg-red-700"
-        >
-          Logout
-        </button>
-      </div>
-    </header>
-  );
+
+<div style={{display:'flex', alignItems:'center', gap:'12px'}}>
+{isAuthenticated && <span>Hello, {user?.name || role}</span>}
+<button onClick={() => dispatch(logout())} className="logout-btn">Logout</button>
+</div>
+</header>
+</>
+);
 };
-
 export default Navbar;
