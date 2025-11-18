@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
-import { io } from 'socket.io-client';
-import { useDispatch } from 'react-redux';
-import { addLiveMapPoint } from '../store/slices/mapSlice';
+import { useEffect } from "react";
+import { io } from "socket.io-client";
+import { useDispatch } from "react-redux";
+import  fetchInitialMapData  from "../store/slices/mapSlice";
+import { fetchDashboardStats } from "../store/slices/statsSlice";
 
 let socket;
 
@@ -10,22 +11,12 @@ export const useSocket = () => {
 
   useEffect(() => {
     if (!socket) {
-      socket = io(import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000');
+      socket = io(import.meta.env.VITE_BACKEND_URL || "http://localhost:5000");
     }
 
-    socket.on('connect', () => {
-      console.log('socket connected', socket.id);
+    socket.on("new-data-point", (point) => {
+      dispatch(fetchInitialMapData(point));
+      dispatch(fetchDashboardStats()); // refresh stats live
     });
-
-    socket.on('new-data-point', (point) => {
-      if (point) dispatch(addLiveMapPoint(point));
-    });
-
-    return () => {
-      if (socket) {
-        socket.off('new-data-point');
-        // don't disconnect to allow reuse
-      }
-    };
-  }, [dispatch]);
+  }, []);
 };

@@ -1,15 +1,24 @@
 import mongoose from "mongoose";
 
-const dataPointSchema = new mongoose.Schema({
-  topic: String,
-  emotion: String,
-  risk_level: String,
-  timestamp: { type: Date, default: Date.now },
-  location_geo: {
-    type: { type: String, enum: ["Point"], default: "Point" },
-    coordinates: [Number],
+const dataPointSchema = new mongoose.Schema(
+  {
+    topic: String,
+    emotion: String,
+    risk_level: String,
+
+    location_geo: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: [Number], // [lng, lat]
+    },
+
+    timestamp: { type: Date, default: Date.now },
   },
-});
+  { timestamps: true }
+);
 
 dataPointSchema.index({ location_geo: "2dsphere" });
 

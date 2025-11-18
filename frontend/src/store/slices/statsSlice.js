@@ -5,12 +5,8 @@ const initialState = {
   topicStats: [],
   emotionStats: [],
   loading: false,
-  error: null,
 };
 
-// ----------------------------------------------------
-// Thunk: Admin Dashboard Stats
-// ----------------------------------------------------
 export const fetchDashboardStats = createAsyncThunk(
   "stats/fetchDashboardStats",
   async (_, thunkAPI) => {
@@ -26,14 +22,10 @@ export const fetchDashboardStats = createAsyncThunk(
   }
 );
 
-// ----------------------------------------------------
-// Slice
-// ----------------------------------------------------
 const statsSlice = createSlice({
   name: "stats",
   initialState,
   reducers: {},
-
   extraReducers: (builder) => {
     builder
       .addCase(fetchDashboardStats.pending, (state) => {
@@ -41,12 +33,11 @@ const statsSlice = createSlice({
       })
       .addCase(fetchDashboardStats.fulfilled, (state, action) => {
         state.loading = false;
-        state.topicStats = action.payload.topicStats || [];
-        state.emotionStats = action.payload.emotionStats || [];
+        state.topicStats = action.payload.topicStats;
+        state.emotionStats = action.payload.emotionStats;
       })
       .addCase(fetchDashboardStats.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
       });
   },
 });

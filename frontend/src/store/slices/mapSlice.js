@@ -1,64 +1,37 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getInitialLoad } from "../../api/statsApi";
 
-// ----------------------------------------------------
-// Initial State
-// ----------------------------------------------------
-const initialState = {
-  dataPoints: [],
-  status: "idle",
-  error: null,
-};
-
-// ----------------------------------------------------
-// Thunk: Load Initial Map Points
-// ----------------------------------------------------
 export const fetchInitialMapData = createAsyncThunk(
   "map/fetchInitialMapData",
-  async (_, thunkAPI) => {
-    try {
-      const token = thunkAPI.getState().auth.token;
-      const data = await getInitialLoad(token); // backend returns array
-      return data;
-    } catch (err) {
-      return thunkAPI.rejectWithValue(
-        err?.response?.data?.message || err.message
-      );
-    }
+  async (_, { getState }) => {
+    const token = getState().auth.token;
+    const res = await getInitialLoad(token);
+    return res.mapData;   // IMPORTANT
   }
 );
 
-// ----------------------------------------------------
-// Slice
-// ----------------------------------------------------
 const mapSlice = createSlice({
   name: "map",
-  initialState,
-  reducers: {
-    addLiveMapPoint: (state, action) => {
-      state.dataPoints.push(action.payload);
-
-      if (state.dataPoints.length > 1500) {
-        state.dataPoints.shift();
-      }
-    },
+  initialState: {
+    dataPoints: [],
+    status: "idle"
   },
-
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchInitialMapData.pending, (state) => {
         state.status = "loading";
       })
       .addCase(fetchInitialMapData.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.dataPoints = action.payload;
+        state.status = "success";
+        console.log("🌍 REDUX MAP DATA:", action.payload);
+        state.dataPoints = action.payload || [];
       })
-      .addCase(fetchInitialMapData.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload;
-      });
-  },
+      .addCase(fetchInitialMapData.rejected, (state) => {
+        state.status = "error";
+      })
+     
+  }
 });
 
-export const { addLiveMapPoint } = mapSlice.actions;
 export default mapSlice.reducer;

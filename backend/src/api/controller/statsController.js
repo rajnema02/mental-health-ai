@@ -1,34 +1,74 @@
-import DataPoint from "../models/DataPoint.js";
+import UserPost from "../models/UserPosts.js";
 
 export const getInitialLoad = async (req, res) => {
-  const points = await DataPoint.find()
-    .sort({ timestamp: -1 })
-    .limit(1000)
-    .select("location_geo emotion risk_level topic");
+  try {
+    // GET MAP DATA
+    const mapData = await UserPost.find(
+      { "location_geo.coordinates": { $exists: true } },
+      {
+        caption: 1,
+        ai_result: 1,
+        topic: 1,
+        location_geo: 1,
+        createdAt: 1
+      }
+    )
+      .sort({ createdAt: -1 })
+      .limit(200);
 
-  res.json(points);
+    // Dummy stats (your old logic)
+    const stats = {
+      topTopics: [],
+      hourlyEmotions: []
+    };
+
+    return res.json({
+      mapData,
+      stats
+    });
+
+  } catch (err) {
+    console.error("INITIAL LOAD ERROR:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
 };
 
+
+
+// GET /api/stats/dashboard
 export const getDashboardStats = async (req, res) => {
-  const last24h = new Date(Date.now() - 24 * 3600 * 1000);
+  try {
+    // TOPICS: top topics in last 24 hours
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-  const topicStats = await DataPoint.aggregate([
-    { $match: { timestamp: { $gte: last24h } } },
-    { $group: { _id: "$topic", count: { $sum: 1 } } },
-    { $sort: { count: -1 } },
-    { $limit: 5 },
-  ]);
+    const topicStats = await UserPost.aggregate([
+      { $match: { createdAt: { $gte: since }, topic: { $exists: true, $ne: null } } },
+      { $group: { _id: '$topic', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 10 },
+    ]);
 
-  const emotionStats = await DataPoint.aggregate([
-    { $match: { timestamp: { $gte: last24h } } },
-    {
-      $group: {
-        _id: { hour: { $hour: "$timestamp" }, emotion: "$emotion" },
-        count: { $sum: 1 },
+    // EMOTION STATS: count per hour for each emotion (last 24 hours)
+    const emotionStats = await UserPost.aggregate([
+      { $match: { createdAt: { $gte: since }, 'ai_result.emotion': { $exists: true } } },
+      {
+        $project: {
+          hour: { $hour: { date: '$createdAt', timezone: 'UTC' } },
+          emotion: '$ai_result.emotion',
+        },
       },
-    },
-    { $sort: { "_id.hour": 1 } },
-  ]);
+      {
+        $group: {
+          _id: { hour: '$hour', emotion: '$emotion' },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { '_id.hour': 1, count: -1 } },
+    ]);
 
-  res.json({ topicStats, emotionStats });
+    return res.json({ topicStats, emotionStats });
+  } catch (err) {
+    console.error('GET DASHBOARD STATS ERROR:', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
 };

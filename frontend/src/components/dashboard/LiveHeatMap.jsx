@@ -1,60 +1,80 @@
-import { MapContainer, TileLayer, Circle, Popup } from 'react-leaflet';
-import { useSelector } from 'react-redux';
-import 'leaflet/dist/leaflet.css';
+import { MapContainer, TileLayer, Circle, Popup } from "react-leaflet";
+import { useSelector } from "react-redux";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 
+// Fix default marker issue
+delete L.Icon.Default.prototype._getIconUrl;
 
-const mapCenter = [23.2599, 77.4126];
-const riskColor = r => r==='high'?'red':r==='medium'?'orange':'blue';
-
-
-const LiveHeatMap = () => {
-const { dataPoints = [], status } = useSelector(state => state.map || {});
-
-
-if (status === 'loading' && !dataPoints.length)
-return <div>Loading...</div>;
-
-
-if (!dataPoints.length)
-return <div>No map data available.</div>;
-
-
-return (
-<>
-<style>{`
-.map-container{ height:400px; border-radius:10px; overflow:hidden; border:1px solid #1e3050; }
-@media(max-width:600px){ .map-container{ height:300px; } }
-`}</style>
-
-
-<div className="map-container">
-<MapContainer center={mapCenter} zoom={12} scrollWheelZoom style={{height:'100%', width:'100%'}}>
-<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-
-
-{dataPoints.map(point => {
-if (!point?.location_geo?.coordinates) return null;
-const [lng, lat] = point.location_geo.coordinates;
-
-
-return (
-<Circle key={point._id} center={[lat, lng]} radius={50} pathOptions={{ color:riskColor(point.risk_level), fillColor:riskColor(point.risk_level), fillOpacity:0.5 }}>
-<Popup>
-<div>
-<strong>Risk:</strong> {point.risk_level}<br />
-<strong>Emotion:</strong> {point.emotion}<br />
-<strong>Topic:</strong> {point.topic}<br />
-{new Date(point.createdAt).toLocaleString()}
-</div>
-</Popup>
-</Circle>
-);
-})}
-</MapContainer>
-</div>
-</>
-);
+const riskColor = (risk) => {
+  if (!risk) return "blue";
+  return risk === "high" ? "red" : risk === "medium" ? "orange" : "blue";
 };
 
+const LiveHeatMap = () => {
+  const { dataPoints = [] } = useSelector((s) => s.map || {});
+
+  console.log("🔥 LiveHeatMap received:", dataPoints);
+
+  if (!dataPoints.length) {
+    return (
+      <div style={{ color: "white", padding: "10px" }}>
+        No map data available.
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        height: "100%",
+        width: "100%",
+        borderRadius: "10px",
+        overflow: "hidden",
+      }}
+    >
+      <MapContainer
+        center={[23.2599, 77.4126]}
+        zoom={12}
+        scrollWheelZoom={true}
+        style={{ height: "100%", width: "100%", zIndex: 9999 }}
+      >
+        <TileLayer url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png" />
+
+        {dataPoints.map((p, i) => {
+          const coords = p?.location_geo?.coordinates;
+          if (!coords || coords.length !== 2) return null;
+
+          const [lng, lat] = coords;
+
+          console.log("📍 Plotting point →", { lat, lng });
+
+          return (
+            <Circle
+              key={p._id || i}
+              center={[lat, lng]}
+              radius={70}
+              pathOptions={{
+                color: riskColor(p?.ai_result?.risk_level),
+                fillColor: riskColor(p?.ai_result?.risk_level),
+                fillOpacity: 0.55,
+              }}
+            >
+              <Popup>
+                <strong>Emotion:</strong> {p.ai_result?.emotion || "N/A"} <br />
+                <strong>Risk:</strong> {p.ai_result?.risk_level || "N/A"} <br />
+                <strong>Topic:</strong> {p.topic || "N/A"} <br />
+                <strong>Time:</strong>{" "}
+                {p.createdAt
+                  ? new Date(p.createdAt).toLocaleString()
+                  : "N/A"}
+              </Popup>
+            </Circle>
+          );
+        })}
+      </MapContainer>
+    </div>
+  );
+};
 
 export default LiveHeatMap;

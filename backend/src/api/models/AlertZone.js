@@ -1,12 +1,22 @@
+// models/AlertZone.js
 import mongoose from "mongoose";
 
 const alertZoneSchema = new mongoose.Schema(
   {
-    name: String,
+    name: { type: String, required: true },
+
     zone: {
-      type: { type: String, enum: ["Polygon"], required: true },
-      coordinates: [[[Number]]],
+      type: {
+        type: String,
+        enum: ["Polygon"],
+        required: true,
+      },
+      coordinates: {
+        type: [[[Number]]], // Correct 3D array
+        required: true,
+      },
     },
+
     official: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Official",
