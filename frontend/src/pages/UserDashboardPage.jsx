@@ -34,15 +34,25 @@ const UserDashboardPage = () => {
           }
           .user-subtext {
             color: #9ca3af;
+            margin-bottom: 12px;
+          }
+          .user-subtext-small {
+            color: #6b7280;
+            font-size: 0.8rem;
             margin-bottom: 18px;
           }
         `}</style>
 
         <div className="user-section">
           <h1 className="user-title">Welcome, {user?.name}!</h1>
+
           <p className="user-subtext">
-            Upload a caption and image to get a private AI analysis.  
-            Your data is always confidential.
+            Upload a caption and image to get a private AI analysis.
+          </p>
+
+          <p className="user-subtext-small">
+            📍 We use your live location (with your permission) to show anonymous
+            stress patterns on the city heatmap. Your identity remains hidden.
           </p>
 
           <PostUploadForm />

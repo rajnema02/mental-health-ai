@@ -5,6 +5,7 @@ import alertsReducer from './slices/alertsSlice';
 import mapReducer from './slices/mapSlice';
 import statsReducer from './slices/statsSlice';
 import userPostReducer from './slices/userPostSlice';
+import userlocationReducer from './slices/userLocationSlice';
 
 const store = configureStore({
   reducer: {
@@ -13,6 +14,7 @@ const store = configureStore({
     map: mapReducer,
     stats: statsReducer,
     userPosts: userPostReducer,
+    userLocation: userlocationReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
