@@ -46,7 +46,9 @@ const userPostSlice = createSlice({
       })
       .addCase(fetchMyPosts.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.posts = action.payload;
+        state.posts = Array.isArray(action.payload)
+  ? action.payload
+  : action.payload.posts || action.payload.data || [];
       })
       .addCase(fetchMyPosts.rejected, (state, action) => {
         state.status = "failed";

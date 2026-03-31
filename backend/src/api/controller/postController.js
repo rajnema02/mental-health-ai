@@ -6,7 +6,9 @@ import UserPost from "../models/UserPosts.js";
 export const uploadPost = async (req, res) => {
   try {
     const caption = req.body.caption;
-    const image = req.file?.path || req.body.image;
+    const image = req.file
+  ? `/uploads/${req.file.filename}`
+  : req.body.image;
 
     if (!caption || !image) {
       return res.status(400).json({ message: "Caption & Image required" });

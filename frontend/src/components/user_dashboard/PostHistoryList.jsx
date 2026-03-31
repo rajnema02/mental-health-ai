@@ -2,7 +2,10 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMyPosts } from "../../store/slices/userPostSlice";
+import { deleteUserPost } from "../../api/userPostApi";
 import Loader from "../common/Loader";
+
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 /**
  * FEATURES:
@@ -37,6 +40,20 @@ const riskColor = (risk) => {
   }
 };
 
+const getImageUrl = (img) => {
+  if (!img) return "";
+
+  // if full path like D:/... → extract filename
+  if (img.includes("uploads")) {
+    const fileName = img.split("uploads").pop().replace(/\\/g, "/");
+    return `${BASE_URL}/uploads${fileName}`;
+  }
+
+  if (img.startsWith("http")) return img;
+
+  return `${BASE_URL}${img}`;
+};
+
 const PostHistoryList = ({ posts: incoming }) => {
   const dispatch = useDispatch();
   const { posts, status } = useSelector((s) => s.userPosts);
@@ -50,32 +67,29 @@ const PostHistoryList = ({ posts: incoming }) => {
     dispatch(fetchMyPosts());
   }, [dispatch]);
 
-  const list = incoming || posts || [];
+  const list = Array.isArray(incoming)
+  ? incoming
+  : Array.isArray(posts)
+  ? posts
+  : [];
 
   const handleDelete = async (id) => {
-    if (!confirm("Delete this post? This action cannot be undone.")) return;
-    try {
-      setDeletingId(id);
-      const res = await fetch(`/api/posts/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : "",
-        },
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "Failed to delete");
-      }
-      // refresh posts
-      await dispatch(fetchMyPosts());
-    } catch (err) {
-      console.error("Delete error:", err);
-      alert(err.message || "Could not delete post");
-    } finally {
-      setDeletingId(null);
-    }
-  };
+  if (!confirm("Delete this post? This action cannot be undone.")) return;
+
+  try {
+    setDeletingId(id);
+
+    await deleteUserPost(id, token); // ✅ FIXED (axios)
+
+    await dispatch(fetchMyPosts()); // refresh list
+
+  } catch (err) {
+    console.error("Delete error:", err);
+    alert(err.response?.data?.message || "Could not delete post");
+  } finally {
+    setDeletingId(null);
+  }
+};
 
   return (
     <>
@@ -196,9 +210,12 @@ const PostHistoryList = ({ posts: incoming }) => {
                     {p.image ? (
                       // show image; onError hides image
                       <img
-  src={p.image?.replace("undefined/", "")}
+  src={getImageUrl(p.image)}
   alt={p.caption}
-  onError={(e) => (e.target.style.display = "none")}
+  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+  onError={(e) => {
+    console.log("❌ Failed:", getImageUrl(p.image));
+  }}
 />
 
                     ) : (
@@ -223,7 +240,7 @@ const PostHistoryList = ({ posts: incoming }) => {
                     <div className="card-actions">
                       <button
                         className="btn ghost"
-                        onClick={() => window.open(p.image || "#", "_blank")}
+                        onClick={() => window.open(getImageUrl(p.image), "_blank")}
                         disabled={!p.image}
                       >
                         Open
